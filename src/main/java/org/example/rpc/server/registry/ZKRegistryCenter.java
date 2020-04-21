@@ -16,7 +16,7 @@ public class ZKRegistryCenter implements RegistryCenter {
 
     private static final String ZK_DUBBO_ROOT_PATH = "/mydubbo";
 
-    public ZKRegistryCenter() {
+    public void init(){
         // 创建并初始化zk的客户端
         client = CuratorFrameworkFactory.builder()
                 // 指定要连接的zk集群
@@ -30,6 +30,9 @@ public class ZKRegistryCenter implements RegistryCenter {
                 .build();
         // 启动zk的客户端
         client.start();
+    }
+
+    public ZKRegistryCenter() {
     }
 
     @Override
