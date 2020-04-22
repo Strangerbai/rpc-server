@@ -118,7 +118,7 @@ public class RpcServer {
             String port = serviceAddress.split(":")[1];
 
             ChannelFuture future = bootstrap.bind(host, Integer.valueOf(port)).sync();
-            System.out.println("Tomcat已启动");
+            System.out.println("dubbo已启动");
             future.channel().closeFuture().sync();
         } finally {
             parentGroup.shutdownGracefully();
