@@ -10,9 +10,12 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.Data;
+import org.example.rpc.server.engine.BeanProvider;
 import org.example.rpc.server.registry.RegistryCenter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,15 +30,17 @@ public class RpcServer {
 
     private RegistryCenter center;
     private String serviceAddress;
+    private ThreadPoolTaskExecutor rpcExecuter;
+    private BeanProvider beanProvider;
 
     // 添加上无参构造器
     public RpcServer() {
     }
 
-    public RpcServer(RegistryCenter center, String serviceAddress) {
-        this.center = center;
-        this.serviceAddress = serviceAddress;
-    }
+//    public RpcServer(RegistryCenter center, String serviceAddress) {
+//        this.center = center;
+//        this.serviceAddress = serviceAddress;
+//    }
 
     public void publish(String basePackage) throws Exception {
         // 将指定包下的提供者类名写入到classCache中进行缓存
@@ -86,7 +91,7 @@ public class RpcServer {
                 return;
             }
             // 将服务名称与提供者主机地址写入到zk
-            center.register(interfaces[0].getName(), serviceAddress);
+            center.register(interfaces[0], serviceAddress);
         }
 
     }
@@ -110,7 +115,8 @@ public class RpcServer {
                             pipeline.addLast(new ObjectEncoder());
                             pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE,
                                     ClassResolvers.cacheDisabled(null)));
-                            pipeline.addLast(new RpcServerHandler(registryMap));
+//                            pipeline.addLast(new RpcServerHandler(registryMap));
+                            pipeline.addLast(new RpcServerHandler(rpcExecuter, beanProvider));
                         }
                     });
 

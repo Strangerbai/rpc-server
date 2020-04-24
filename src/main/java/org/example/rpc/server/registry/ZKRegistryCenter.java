@@ -6,6 +6,11 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * zk做注册中心
  */
@@ -36,15 +41,18 @@ public class ZKRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void register(String serviceName, String serviceAddress) throws Exception {
+    public void register(Class<?> service, String serviceAddress) throws Exception {
         // 创建持久节点
-        String servicePath = ZK_DUBBO_ROOT_PATH + "/" + serviceName;
+        String servicePath = ZK_DUBBO_ROOT_PATH + "/" + service.getName();
          if (client.checkExists().forPath(servicePath) == null) {
              client.create()
                      .creatingParentsIfNeeded() // 若父节点不存在，则会自动创建父节点
                      .withMode(CreateMode.PERSISTENT)  // 指定创建持久节点
                      .forPath(servicePath);  // 指定要创建的节点
          }
+        List<String> methodNames = Arrays.stream(service.getMethods()).map(Method::getName).collect(Collectors.toList());
+
+        client.setData().forPath(servicePath,methodNames.toString().getBytes());
 
         // 创建临时节点
         String hostPath = servicePath + "/" + serviceAddress;

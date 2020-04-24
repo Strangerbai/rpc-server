@@ -29,5 +29,9 @@ public class Invocation implements Serializable {
      * 要调用的业务接口实现类的功能性前辍
      */
     private String prefix;
+    /**
+     * 是否异步调用
+     */
+    private boolean asyn;
 
 }
